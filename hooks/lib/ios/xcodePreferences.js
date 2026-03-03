@@ -6,6 +6,7 @@ Which is:
 - path to .entitlements file added to Code Sign Entitlements preference
 */
 
+var fs = require('fs');
 var path = require('path');
 var compare = require('node-version-compare');
 var ConfigXmlHelper = require('../configXmlHelper.js');
@@ -160,9 +161,7 @@ function loadProjectFile() {
           
           projectFile = {
               'xcode': xcodeproj,
-              write: function () {
-                  var fs = require('fs');
-                  
+              write: function () {                  
               var frameworks_file = path.join(iosPlatformPath(), 'frameworks.json');
               var frameworks = {};
               try {
