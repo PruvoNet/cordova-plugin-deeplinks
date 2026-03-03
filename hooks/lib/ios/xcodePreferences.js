@@ -224,7 +224,6 @@ function pathToEntitlementsFile() {
 }
 
 function getProjectDirName(projectName) {
-  var fs = require('fs');
   // cordova-ios 8.0.0 renamed the project directory from the app name to 'App'
   if (fs.existsSync(path.join(iosPlatformPath(), projectName))) {
     return projectName;
