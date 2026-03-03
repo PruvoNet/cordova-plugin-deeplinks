@@ -6,6 +6,7 @@ Which is:
 - path to .entitlements file added to Code Sign Entitlements preference
 */
 
+var fs = require('fs');
 var path = require('path');
 var compare = require('node-version-compare');
 var ConfigXmlHelper = require('../configXmlHelper.js');
@@ -160,9 +161,7 @@ function loadProjectFile() {
           
           projectFile = {
               'xcode': xcodeproj,
-              write: function () {
-                  var fs = require('fs');
-                  
+              write: function () {                  
               var frameworks_file = path.join(iosPlatformPath(), 'frameworks.json');
               var frameworks = {};
               try {
@@ -172,7 +171,7 @@ function loadProjectFile() {
               fs.writeFileSync(pbxPath, xcodeproj.writeSync());
                   if (Object.keys(frameworks).length === 0){
                       // If there is no framework references remain in the project, just remove this file
-                      require('shelljs').rm('-rf', frameworks_file);
+                      try { fs.rmSync(frameworks_file, { force: true }); } catch (_e) { /* ignore */ }
                       return;
                   }
                   fs.writeFileSync(frameworks_file, JSON.stringify(this.frameworks, null, 4));
@@ -218,9 +217,18 @@ function projectRoot() {
 function pathToEntitlementsFile() {
   var configXmlHelper = new ConfigXmlHelper(context),
     projectName = configXmlHelper.getProjectName(),
-    fileName = projectName + '.entitlements';
+    projectDirName = getProjectDirName(projectName),
+    fileName = projectDirName + '.entitlements';
 
-  return path.join(projectName, 'Resources', fileName);
+  return path.join(projectDirName, 'Resources', fileName);
+}
+
+function getProjectDirName(projectName) {
+  // cordova-ios 8.0.0 renamed the project directory from the app name to 'App'
+  if (fs.existsSync(path.join(iosPlatformPath(), projectName))) {
+    return projectName;
+  }
+  return 'App';
 }
 
 // endregion
